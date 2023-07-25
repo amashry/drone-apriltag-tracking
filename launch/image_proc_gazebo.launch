@@ -1,0 +1,15 @@
+<launch>
+  <!-- Launch the image_proc node -->
+  <node pkg="image_proc" type="image_proc" name="image_proc_node">
+    <remap from="image_raw" to="/iris/usb_cam/image_raw"/>
+    <remap from="camera_info" to="/iris/usb_cam/camera_info"/>
+    <param name="approximate_sync" value="true"/>
+    <param name="use_camera_info" value="true"/>
+    <param name="rectify_mono" value="true"/>
+  </node>
+  
+  <!-- Launch the image_publisher node -->
+  <!--node pkg="image_view" type="image_view" name="image_publisher" output="screen">
+    <remap from="image" to="iris/usb_cam/image_raw_rect"/>
+  </node-->
+</launch>
