@@ -12,9 +12,6 @@
 #include "apriltag_ros/AprilTagDetectionArray.h"
 #include <Eigen/Dense>
 
-// this is still not working and it's not reading from the tag_detections topic that's publishing virtualy. Although it's working
-// when we echo the topic we can see it working and publishing detections. CHECK THAT 
-
 mavros_msgs::PositionTarget pose_vel;
 apriltag_ros::AprilTagDetectionArray at_in_data;
 geometry_msgs::PoseStamped lpp_data;
@@ -60,8 +57,8 @@ int main(int argc, char **argv)
     
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(20.0);
-    mavros_msgs::PositionTarget pose_vel;
 
+    mavros_msgs::PositionTarget pose_vel;
     // Note that this type_mask is assuming you are affecting VELOCITY control over the vehicle.  See the original offboard example for the position type mask
     //pose_vel.coordinate_frame = pose_vel.FRAME_BODY_NED;//pose_vel.FRAME_LOCAL_NED;
     pose_vel.coordinate_frame = 1;
@@ -78,6 +75,7 @@ int main(int argc, char **argv)
         if (at_in_data.detections.empty()) {
         ROS_WARN_STREAM("No AprilTags detected.");
         // Here you could add any fallback behavior if necessary.
+        // current one is just to hover in place. 
         pose_vel.header.stamp = ros::Time::now();
         pose_vel.position.x = lpp_data.pose.position.x;
         pose_vel.position.y = lpp_data.pose.position.y;
@@ -192,14 +190,10 @@ int main(int argc, char **argv)
         target_lpp_pub.publish(lpp_pub_data);
 
 
-        Eigen::Matrix4d K;
-        K.block(0,0,4,4) = Eigen::Matrix4d::Constant(4, 4, 0.0);
-        K(0,0) = 0.5; // K_x gain
-        K(1,1) = 0.5; // K_y gain
-        K(3,3) = 1.0; // this must be 1.0 (I think), because 
         Eigen::Vector4d r_DP_I(4);
         
-        r_DP_I << 0.0, -0.5, 0.0, 1.0; // pretty sure the z component of this vector doesn't impact 'u', so it can be set to anything...
+        r_DP_I << 0.0, -0.5, 0.0, 1.0;
+        
         if (all_in) {
             // all_in is set to true, if, during this iteration of the while loop, we have obtained both a tag_detection measurement and a mavros/local_position/pose measurement
             // - if we don't get tag_detection or mavros data, then don't update the control input, and just repeat the control input requested at the previous time-step
